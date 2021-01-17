@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.calling.app.exceptions.BadRequestException;
 import com.calling.app.exceptions.InternalServerException;
+import com.calling.app.models.HelloWorldResponse;
 
 import io.github.resilience4j.retry.annotation.Retry;
 import reactor.core.publisher.Mono;
@@ -26,13 +27,13 @@ public class CallingServiceImpl implements CallingService {
 
 	@Override
 	@Retry(name = "callerService")
-	public Mono<String> getHello() {
+	public Mono<HelloWorldResponse> getHello() {
 		return webClient.get().uri(uri).retrieve()
 				.onStatus(HttpStatus::is4xxClientError,
 						clientResponse -> Mono.error(new BadRequestException(BAD_REQUEST_EXCEPTION)))
 				.onStatus(HttpStatus::is5xxServerError,
 						clientResponse -> Mono.error(new InternalServerException(INTERNAL_SERVER_EXCEPTION)))
-				.bodyToMono(String.class);
+				.bodyToMono(HelloWorldResponse.class);
 	}
 
 }
